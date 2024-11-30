@@ -1,30 +1,27 @@
-# main.py
-from transformerbased_obfuscation import obfuscate_code
+import os
+from transformerbased_obfuscation import CodeObfuscator
 
+BASELINE_DIR = "Baseline"
+OUTPUT_DIR = "Baseline_obfuscated"
 
-def run_baseline_code(file_path):
-    # Implement logic to run code in file_path
-    # ... and return output. Replace this with your actual logic.
-    with open(file_path, 'r') as f:
-        exec(f.read())
-        return "Baseline Output"  # Placeholder
+def obfuscate_project():
+    obfuscator = CodeObfuscator()
 
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-def run_obfuscated_code(file_path):
-    with open(file_path, 'r') as f:
-        exec(f.read())
-        return "Obfuscated Output"  # Placeholder
+    for file_name in os.listdir(BASELINE_DIR):
+        if file_name.endswith(".py"):
+            input_path = os.path.join(BASELINE_DIR, file_name)
+            output_path = os.path.join(OUTPUT_DIR, file_name)
 
+            with open(input_path, "r") as f:
+                code = f.read()
+
+            obfuscated_code = obfuscator.obfuscate_code(code)
+
+            with open(output_path, "w") as f:
+                f.write(obfuscated_code)
 
 if __name__ == "__main__":
-    baseline_file = "Baseline/data_structures/binary_tree/binary_search.py"  # Replace with actual path.
-    obfuscated_file = "Baseline_obfuscated/data_structures/binary_tree/binary_search_tree.py"
-
-    obfuscate_code(baseline_file, obfuscated_file)
-
-    baseline_output = run_baseline_code(baseline_file)
-    obfuscated_output = run_obfuscated_code(obfuscated_file)
-
-    print(f"Baseline Output:\n{baseline_output}\n")
-    print(f"Obfuscated Output:\n{obfuscated_output}\n")
-    assert baseline_output == obfuscated_output, "Outputs don't match!"
+    obfuscate_project()

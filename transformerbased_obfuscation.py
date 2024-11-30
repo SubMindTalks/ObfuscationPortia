@@ -1,19 +1,12 @@
-# transformerbased_obfuscation.py
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
+class CodeObfuscator:
+    def __init__(self, model_name="Salesforce/codet5-base"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
-def obfuscate_code(input_file, output_file):
-    classifier = pipeline("text-classification")  # Placeholder - In a full implementation, load a suitable model here.
-    try:
-        with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
-            for line in infile:
-                # Simple example: replace variable 'x' with 'var_1'.  Extend for a more robust solution.
-                outfile.write(line.replace('x', 'var_1'))
-    except Exception as e:
-        print(f"Error during obfuscation: {e}")
-        # Handle the exception appropriately. For instance, copy original file to output.
-        import shutil
-        try:
-            shutil.copy(input_file, output_file)
-        except Exception as copy_e:
-            print(f"Error copying original file: {copy_e}")
+    def obfuscate_code(self, code):
+        inputs = self.tokenizer(code, return_tensors="pt", truncation=True, max_length=512)
+        outputs = self.model.generate(inputs.input_ids, max_length=512, num_beams=4, early_stopping=True)
+        obfuscated_code = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return obfuscated_code

@@ -1,25 +1,24 @@
-# test_transformerbased_obfuscation.py
-import unittest
-from transformerbased_obfuscation import obfuscate_code
+import subprocess
+import os
 
+BASELINE_DIR = "Baseline"
+OBFUSCATED_DIR = "Baseline_obfuscated"
+STATIC_RESOURCES_DIR = "static_resources"
 
-class TestObfuscation(unittest.TestCase):
+def test_code_execution(file_name):
+    original_path = os.path.join(BASELINE_DIR, file_name)
+    obfuscated_path = os.path.join(OBFUSCATED_DIR, file_name)
 
-    def test_obfuscation(self):
-        input_code = "x = 10\nprint(x)"
-        expected_output = "var_1 = 10\nprint(var_1)"
+    input_data = os.path.join(STATIC_RESOURCES_DIR, "test_input.txt")
+    original_output = subprocess.check_output(["python", original_path, input_data])
+    obfuscated_output = subprocess.check_output(["python", obfuscated_path, input_data])
 
-        # Use temporary files for testing
-        with open("temp_input.py", "w") as f:
-            f.write(input_code)
+    assert original_output == obfuscated_output, f"Outputs differ for {file_name}!"
 
-        obfuscate_code("temp_input.py", "temp_output.py")
+def run_tests():
+    for file_name in os.listdir(BASELINE_DIR):
+        if file_name.endswith(".py"):
+            test_code_execution(file_name)
 
-        with open("temp_output.py", "r") as f:
-            obfuscated_code = f.read()
-
-        self.assertEqual(obfuscated_code, expected_output)
-
-
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    run_tests()
